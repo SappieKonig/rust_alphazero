@@ -51,25 +51,31 @@ impl TicTacToe {
     // Make a move
     pub(crate) fn move_piece(&mut self, move_position: usize) {
         if move_position < self.board.len() {
-            self.board[move_position] = self.turn as i8;
+            self.board[move_position] = self.turn;
             self.turn = 3 - self.turn;
         }
     }
 
-    // Check if the current player has won
     fn has_won(&self) -> bool {
+        return self.get_winner() != 0;
+    }
+
+    // Check if the current player has won
+    fn get_winner(&self) -> i8 {
         let check_line = |a, b, c| {
             self.board[a] != 0 && self.board[a] == self.board[b] && self.board[a] == self.board[c]
         };
         for i in 0..3 {
-            if check_line(i, i + 3, i + 6) || check_line(i * 3, i * 3 + 1, i * 3 + 2) {
-                return true;
+            if check_line(i, i + 3, i + 6) {
+                return self.board[i];
+            } else if check_line(i * 3, i * 3 + 1, i * 3 + 2) {
+                return self.board[i * 3];
             }
         }
         if check_line(0, 4, 8) || check_line(2, 4, 6) {
-            return true;
+            return self.board[4];
         }
-        false
+        0
     }
 
     // Check if the game is over
@@ -103,13 +109,11 @@ impl TicTacToe {
     }
 
     pub(crate) fn get_reward(&self) -> Vector {
-        if self.has_won() {
-            if self.turn == 1 {
-                return Vector::from_slice(&[0., 1.0]);
-            }
-            else {
-                return Vector::from_slice(&[1.0, 0.]);
-            }
+        let winner = self.get_winner();
+        if winner == 1 {
+            return Vector::from_slice(&[1., 0.]);
+        } else if winner == 2 {
+            return Vector::from_slice(&[0., 1.]);
         }
         Vector::from_slice(&[0.5, 0.5])
     }
